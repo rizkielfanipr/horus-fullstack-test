@@ -36,7 +36,7 @@ const Login = () => {
         name="password"
       />
       <Button text="Login" onClick={handleLogin} />
-      <div className="mt-4 text-center">
+      <div className="mt-4 text-center text-sm">
         <p>
           Belum punya akun?{' '}
           <span
