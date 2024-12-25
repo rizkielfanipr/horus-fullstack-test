@@ -5,29 +5,28 @@ const dotenv = require('dotenv');
 const userRoutes = require('./routes/userRoutes');
 const sequelize = require('./config/Database');
 
-// Initialize dotenv
+// Memuat variabel lingkungan dari .env
 dotenv.config();
 
-// Create Express app
+// Membuat aplikasi Express
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors()); // Mengaktifkan CORS
+app.use(bodyParser.json()); // Mengurai body request dalam format JSON
 
-// Routes
-app.use('/api', userRoutes);
+// Rute API
+app.use('/api', userRoutes); // Menggunakan rute user di endpoint /api
 
-// Test database connection and sync models
-sequelize
-  .authenticate()
-  .then(() => console.log('Database connected'))
+// Menguji koneksi ke database
+sequelize.authenticate()
+  .then(() => console.log('Database terhubung'))
   .catch((err) => console.log('Error: ' + err));
 
-sequelize.sync({ force: false }).then(() => {
-  console.log('Database synced');
-});
+// Menyinkronkan model-model database
+sequelize.sync({ force: false })
+  .then(() => console.log('Database disinkronkan'));
 
-// Start server
+// Menjalankan server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));
