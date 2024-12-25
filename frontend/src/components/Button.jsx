@@ -1,16 +1,11 @@
-import propTypes from 'prop-types';
+import PropTypes from 'prop-types';
 
 const Button = ({ text, onClick, type = 'button' }) => {
   return (
     <button
       type={type}
       onClick={onClick}
-      className="btn"
-      style={{
-        backgroundColor: '#79D7BE',
-        color: 'white',
-        border: 'none',
-      }}
+      className="bg-[#03346E] text-white py-2 px-4 rounded-md hover:bg-[#022a4d] focus:outline-none w-full mt-2"
     >
       {text}
     </button>
@@ -18,9 +13,9 @@ const Button = ({ text, onClick, type = 'button' }) => {
 };
 
 Button.propTypes = {
-  text: propTypes.string,
-  onClick: propTypes.func,
-  type: propTypes.string,
+  text: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+  type: PropTypes.string,
 };
 
 export default Button;

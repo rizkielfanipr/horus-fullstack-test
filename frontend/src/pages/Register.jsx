@@ -1,47 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Import axios
-import InputField from '../components/InputField.jsX';
+import { useAuth } from '../hooks/useAuth';
+import InputField from '../components/InputField'; 
 import Button from '../components/Button';
+import FormContainer from '../components/FormContainer';
+import Alert from '../components/Alert';  // Komponen Alert untuk menampilkan pesan
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const navigate = useNavigate();
-
-  const handleRegister = async () => {
-    if (!username || !password || !email || !name) {
-      alert('Semua field harus diisi!');
-      return;
-    }
-
-    try {
-      const response = await axios.post('http://localhost:5000/api/register', {
-        username,
-        password,
-        email,
-        name,
-      });
-
-      // Memeriksa apakah response berisi message yang benar
-      if (response.data.message === 'User created successfully') {
-        alert('Registrasi berhasil, silakan login!');
-        navigate('/'); // Arahkan ke halaman login setelah registrasi
-      } else {
-        alert('Terjadi kesalahan saat registrasi');
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      alert('Terjadi kesalahan saat registrasi, coba lagi nanti.');
-    }
-  };
+  const {
+    username, setUsername,
+    password, setPassword,
+    email, setEmail,
+    name, setName,
+    alert,  
+    handleRegister,
+  } = useAuth();
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-5 border rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Registrasi</h2>
+    <FormContainer title="Registrasi">
+      {alert && <Alert type={alert.type} message={alert.message} />} {/* Menampilkan alert */}
+
       <InputField
+        label="Username"
         type="text"
         placeholder="Username"
         value={username}
@@ -49,6 +27,7 @@ const Register = () => {
         name="username"
       />
       <InputField
+        label="Password" 
         type="password"
         placeholder="Password"
         value={password}
@@ -56,6 +35,7 @@ const Register = () => {
         name="password"
       />
       <InputField
+        label="Email"
         type="email"
         placeholder="Email"
         value={email}
@@ -63,6 +43,7 @@ const Register = () => {
         name="email"
       />
       <InputField
+        label="Nama Lengkap"
         type="text"
         placeholder="Nama"
         value={name}
@@ -70,7 +51,7 @@ const Register = () => {
         name="name"
       />
       <Button text="Registrasi" onClick={handleRegister} />
-    </div>
+    </FormContainer>
   );
 };
 
