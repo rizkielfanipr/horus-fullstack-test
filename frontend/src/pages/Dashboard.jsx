@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { FaSortAlphaDown, FaSortAlphaUp, FaSignOutAlt } from 'react-icons/fa';
 import EditUserModal from '../components/EditUserModal';
 import UserTable from '../components/UserTable';
@@ -14,49 +11,14 @@ const Dashboard = () => {
     handleSort, 
     handleDelete, 
     sortOrder, 
-    setUsers } = useUsers();
-
-  const [showModal, setShowModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const navigate = useNavigate();
-
-  // Open modal for editing
-  const openModal = (user) => {
-    setCurrentUser(user);
-    setShowModal(true);
-  };
-
-  // Close modal
-  const closeModal = () => {
-    setShowModal(false);
-    setCurrentUser(null);
-  };
-
-  // Handle user update
-  const handleUpdate = () => {
-    if (!currentUser) return;
-
-    axios
-      .put(`http://localhost:5000/api/update/${currentUser.id}`, currentUser)
-      .then(() => {
-        setUsers(users.map((user) => (user.id === currentUser.id ? currentUser : user)));
-        closeModal();
-      })
-      .catch((error) => {
-        console.error('Error updating user:', error);
-      });
-  };
-
-  // Handle input change in modal
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentUser({ ...currentUser, [name]: value });
-  };
-
-  // Logout and redirect
-  const handleLogout = () => {
-    navigate('/');
-  };
+    showModal, 
+    currentUser, 
+    openModal, 
+    closeModal, 
+    handleInputChange, 
+    handleUpdate, 
+    handleLogout 
+  } = useUsers();
 
   return (
     <div className="container mx-auto p-6">
