@@ -1,58 +1,26 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaEdit, FaTrash, FaSortAlphaDown, FaSortAlphaUp, FaSignOutAlt } from 'react-icons/fa'; // Importing additional icons
-import InputField from '../components/InputField'; 
+import { FaSortAlphaDown, FaSortAlphaUp, FaSignOutAlt } from 'react-icons/fa';
+import EditUserModal from '../components/EditUserModal';
+import UserTable from '../components/UserTable';
+import { useUsers } from '../hooks/useUsers';
 
 const Dashboard = () => {
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState('asc');
+  const { 
+    users, 
+    searchTerm, 
+    handleSearch, 
+    handleSort, 
+    handleDelete, 
+    sortOrder, 
+    setUsers } = useUsers();
+
   const [showModal, setShowModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch user data
-  useEffect(() => {
-    axios.get('http://localhost:5000/api/users')
-      .then(response => {
-        setUsers(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the users!", error);
-      });
-  }, []);
-
-  // Handle search
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  // Handle sort
-  const handleSort = () => {
-    const sortedUsers = [...users].sort((a, b) => {
-      if (sortOrder === 'asc') {
-        return a.name.localeCompare(b.name);
-      } else {
-        return b.name.localeCompare(a.name);
-      }
-    });
-    setUsers(sortedUsers);
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  };
-
-  // Handle delete
-  const handleDelete = (userId) => {
-    axios.delete(`http://localhost:5000/api/delete/${userId}`)
-      .then(() => {
-        setUsers(users.filter(user => user.id !== userId));
-      })
-      .catch(error => {
-        console.error("There was an error deleting the user!", error);
-      });
-  };
-
-  // Open modal to edit user
+  // Open modal for editing
   const openModal = (user) => {
     setCurrentUser(user);
     setShowModal(true);
@@ -64,149 +32,77 @@ const Dashboard = () => {
     setCurrentUser(null);
   };
 
-  // Handle update
+  // Handle user update
   const handleUpdate = () => {
-    axios.put(`http://localhost:5000/api/update/${currentUser.id}`, currentUser)
+    if (!currentUser) return;
+
+    axios
+      .put(`http://localhost:5000/api/update/${currentUser.id}`, currentUser)
       .then(() => {
-        setUsers(users.map(user => (user.id === currentUser.id ? currentUser : user)));
+        setUsers(users.map((user) => (user.id === currentUser.id ? currentUser : user)));
         closeModal();
       })
-      .catch(error => {
-        console.error("There was an error updating the user!", error);
+      .catch((error) => {
+        console.error('Error updating user:', error);
       });
   };
 
-  // Handle input change
+  // Handle input change in modal
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCurrentUser({ ...currentUser, [name]: value });
   };
 
-  // Handle logout
+  // Logout and redirect
   const handleLogout = () => {
-    navigate('/'); 
-    // Add your logout logic here
+    navigate('/');
   };
 
   return (
-    <div className="container mx-auto p-12">
-      {/* Title and Search bar */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Users Dashboard</h2>
+    <div className="container mx-auto p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold text-[#03346E]">Users Dashboard</h2>
         <div className="flex space-x-4">
-          <button onClick={handleSort} className="btn bg-[#03346E] text-white flex items-center space-x-2 hover:bg-[#001A40]">
-            {/* Display different icons based on sort order */}
-            {sortOrder === 'asc' ? (
-              <FaSortAlphaUp size={16} />
-            ) : (
-              <FaSortAlphaDown size={16} />
-            )}
+          <button
+            onClick={handleSort}
+            className="btn bg-[#03346E] text-white flex items-center space-x-2 hover:bg-[#001A40] px-4 py-2 rounded-md"
+          >
+            {sortOrder === 'asc' ? <FaSortAlphaUp size={16} /> : <FaSortAlphaDown size={16} />}
+            <span>Sort</span>
           </button>
-          <input 
-            type="text" 
-            placeholder="Search by name..." 
+          <input
+            type="text"
+            placeholder="Search by name..."
             value={searchTerm}
             onChange={handleSearch}
-            className="input input-bordered"
+            className="input input-bordered px-4 py-2 rounded-md border border-gray-300"
           />
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto max-w-full mx-auto">
-        <table className="table-auto w-full min-w-max border border-gray-300 border-collapse rounded-lg">
-          <thead>
-            <tr className="border-b border-gray-300">
-              <th className="px-4 py-2 text-center">No</th>
-              <th className="px-4 py-2 text-center">Name</th>
-              <th className="px-4 py-2 text-center">Username</th>
-              <th className="px-4 py-2 text-center">Email</th>
-              <th className="px-4 py-2 text-center">Password</th>
-              <th className="px-4 py-2 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase())).map((user, index) => (
-              <tr key={user.id} className="hover:bg-gray-100 border-b border-gray-300">
-                <td className="px-8 py-2 text-center">{index + 1}</td>
-                <td className="px-6 py-6 text-center">{user.name}</td>
-                <td className="px-4 py-2 text-center">{user.username}</td>
-                <td className="px-4 py-2 text-center">{user.email}</td>
-                <td className="px-4 py-2 text-center">{user.password ? `${user.password.slice(0, 5)}*****` : 'No password'}</td>
-                <td className="px-4 py-2 space-x-2 text-center">
-                  <button 
-                    onClick={() => openModal(user)} 
-                    className="btn text-sm text-green-600 hover:text-green-800"
-                  >
-                    <FaEdit size={16} className="text-green-600" />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(user.id)} 
-                    className="btn btn-danger text-sm text-red-600 hover:text-red-800"
-                  >
-                    <FaTrash size={16} className="text-red-600" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* User Table */}
+      <UserTable users={users} searchTerm={searchTerm} openModal={openModal} handleDelete={handleDelete} />
 
-      {/* Logout button */}
-      <div className="flex justify-end mt-4">
-        <button 
-          onClick={handleLogout} 
-          className="btn bg-red-700 text-white flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-red-800"
+      {/* Logout Button */}
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={handleLogout}
+          className="btn bg-[#FF2929] text-white flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-red-800"
         >
           <FaSignOutAlt size={16} />
           <span>Logout</span>
         </button>
       </div>
 
-      {/* Modal for editing */}
-      {showModal && currentUser && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h3 className="text-xl font-semibold mb-4">Edit User</h3>
-            <InputField 
-              label="Name"
-              type="text"
-              name="name"
-              value={currentUser.name}
-              onChange={handleInputChange}
-              placeholder="Enter name"
-            />
-            <InputField 
-              label="Username"
-              type="text"
-              name="username"
-              value={currentUser.username}
-              onChange={handleInputChange}
-              placeholder="Enter username"
-            />
-            <InputField 
-              label="Email"
-              type="email"
-              name="email"
-              value={currentUser.email}
-              onChange={handleInputChange}
-              placeholder="Enter email"
-            />
-            <InputField 
-              label="Password"
-              type="password"
-              name="password"
-              value={currentUser.password}
-              onChange={handleInputChange}
-              placeholder="Enter password"
-            />
-            <div className="flex justify-end space-x-2 mt-4">
-              <button onClick={closeModal} className="btn bg-red-700 text-white hover:bg-red-800">Cancel</button>
-              <button onClick={handleUpdate} className="btn bg-[#03346E] text-white hover:bg-[#022a4d]">Update</button>
-            </div>
-          </div>
-        </div>
+      {/* Edit User Modal */}
+      {showModal && (
+        <EditUserModal
+          currentUser={currentUser}
+          handleInputChange={handleInputChange}
+          handleUpdate={handleUpdate}
+          closeModal={closeModal}
+        />
       )}
     </div>
   );
